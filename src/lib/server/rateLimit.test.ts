@@ -14,3 +14,17 @@ describe('rate limiter', () => {
 		expect(rl.hit('k')).toBe(true);
 	});
 });
+
+describe('checking without counting', () => {
+	it('blocked() reports the limit without using up a try', () => {
+		vi.useFakeTimers();
+		const rl = createRateLimiter({ max: 2, windowMs: 60_000 });
+		expect(rl.blocked('k')).toBe(false);
+		rl.hit('k');
+		rl.hit('k');
+		expect(rl.blocked('k')).toBe(true);
+		expect(rl.blocked('other')).toBe(false);
+		vi.advanceTimersByTime(60_001);
+		expect(rl.blocked('k')).toBe(false);
+	});
+});

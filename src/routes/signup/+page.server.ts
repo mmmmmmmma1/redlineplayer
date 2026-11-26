@@ -4,7 +4,7 @@ import { getDb } from '#lib/server/db/index.js';
 import { signUp } from '#lib/server/accounts.js';
 import { createSession } from '#lib/server/auth/session.js';
 import { setSessionCookie } from '#lib/server/cookies.js';
-import { allowAuthAttempt } from '#lib/server/limits.js';
+import { allowSignUp } from '#lib/server/limits.js';
 import { normaliseUsername } from '#lib/server/auth/username.js';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -18,7 +18,7 @@ export const actions: Actions = {
 		const displayName = String(f.get('displayName') ?? '');
 		const password = String(f.get('password') ?? '');
 		const n = normaliseUsername(username);
-		if (!allowAuthAttempt(getClientAddress(), 'key' in n ? n.key : username.slice(0, 40))) {
+		if (!allowSignUp(getClientAddress(), 'key' in n ? n.key : username.slice(0, 40))) {
 			return fail(429, { username, displayName, error: 'Too many tries. Wait a minute and try again.' });
 		}
 		const db = getDb();

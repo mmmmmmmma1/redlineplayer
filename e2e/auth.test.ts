@@ -62,3 +62,13 @@ test('pages send security headers', async ({ request }) => {
 	expect(h['x-content-type-options']).toBe('nosniff');
 	expect(h['referrer-policy']).toBe('same-origin');
 });
+
+test('logging in successfully many times is not rate limited', async ({ page }) => {
+	const name = uniqueName();
+	await signUp(page, name);
+	for (let i = 0; i < 7; i++) {
+		await logOut(page);
+		await logIn(page, name);
+		await expect(page).toHaveURL(/\/pending$/);
+	}
+});
