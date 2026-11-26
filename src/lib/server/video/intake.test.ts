@@ -23,8 +23,11 @@ beforeAll(() => {
 	const lavfi = ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'testsrc=size=320x240:rate=15', '-f', 'lavfi', '-i', 'sine=frequency=440'];
 	execFileSync('ffmpeg', [...lavfi, '-t', '2', '-c:v', 'libx264', '-c:a', 'aac', '-metadata', 'location=+40.6892-074.0445/', '-metadata', 'make=Phone', fixture('short.mp4')]);
 	execFileSync('ffmpeg', ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'color=size=64x64:rate=2', '-t', '200', '-c:v', 'libx264', fixture('long.mp4')]);
+	// Like a browser recording: WebM written as a stream, so the file has no duration.
+	execFileSync('sh', ['-c', `ffmpeg -v error -f lavfi -i testsrc=size=320x240:rate=15 -t 3 -c:v libvpx -deadline realtime -live 1 -f webm pipe:1 > '${fixture('recorded.webm')}'`]);
+	execFileSync('sh', ['-c', `ffmpeg -v error -f lavfi -i color=size=64x64:rate=5 -t 200 -c:v libvpx -deadline realtime -live 1 -f webm pipe:1 > '${fixture('long-recorded.webm')}'`]);
 	writeFileSync(fixture('notes.mp4'), 'this is just text pretending to be a video\n'.repeat(50));
-}, 120_000);
+}, 240_000);
 
 describe('video intake', () => {
 	it('accepts a short clip and strips GPS', async () => {
@@ -40,6 +43,18 @@ describe('video intake', () => {
 		expect(tags(out)).not.toContain('location');
 		expect(tags(out)).not.toContain('Phone');
 		expect(existsSync(inp.tmpPath)).toBe(false);
+	}, 60_000);
+
+	it('accepts a camera recording with no duration in the file', async () => {
+		const storage = diskStorage(join(dir, 'store'));
+		const r = await intakeVideo(input('recorded.webm'), storage);
+		if ('error' in r) throw new Error(r.error);
+		expect(r.durationS).toBeGreaterThan(2.5);
+		expect(r.durationS).toBeLessThan(3.5);
+	}, 60_000);
+
+	it('still rejects a long recording with no duration in the file', async () => {
+		expect(await intakeVideo(input('long-recorded.webm'), diskStorage(join(dir, 'store')))).toEqual({ error: 'too_long' });
 	}, 60_000);
 
 	it('rejects a renamed text file as not_video', async () => {

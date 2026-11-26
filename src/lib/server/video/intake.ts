@@ -21,10 +21,28 @@ async function probeDuration(file: string): Promise<number | null> {
 		const info = JSON.parse(stdout) as { streams?: { codec_type: string }[]; format?: { duration?: string } };
 		if (!info.streams?.some((s) => s.codec_type === 'video')) return null;
 		const d = Number(info.format?.duration);
-		return Number.isFinite(d) && d > 0 ? d : null;
+		if (Number.isFinite(d) && d > 0) return d;
+		return await measureDuration(file);
 	} catch {
 		return null;
 	}
+}
+
+/**
+ * Browser recordings (MediaRecorder WebM) don't store a duration, so read through the packets
+ * without decoding them. Stops just past the limit, so a huge file can't keep it busy.
+ */
+async function measureDuration(file: string): Promise<number | null> {
+	const { stderr } = await run(
+		'ffmpeg',
+		['-v', 'info', '-nostdin', '-i', file, '-map', '0:v:0', '-t', String(MAX_SECONDS + 1), '-c', 'copy', '-f', 'null', '-'],
+		{ timeout: 60_000 }
+	);
+	const times = [...stderr.matchAll(/time=(\d+):(\d+):(\d+(?:\.\d+)?)/g)];
+	const last = times.at(-1);
+	if (!last) return null;
+	const d = Number(last[1]) * 3600 + Number(last[2]) * 60 + Number(last[3]);
+	return d > 0 ? d : null;
 }
 
 /**
