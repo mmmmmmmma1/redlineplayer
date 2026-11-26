@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Role, Status, Video, VideoStatus } from './db/schema';
 import {
 	canDeleteVideo,
+	canMakePrivate,
 	canManageRoles,
 	canReport,
 	canRequestVideo,
@@ -108,5 +109,16 @@ describe('changing videos', () => {
 		expect(canReport(owner, video('added'))).toBe(false);
 		expect(canReport(other, video('private'))).toBe(false);
 		expect(canReport(actor('player', 'pending', 'p'), video('added'))).toBe(false);
+	});
+});
+
+describe('making a video private again', () => {
+	it('owner can pull back a requested or added video', () => {
+		expect(canMakePrivate(owner, video('requested'))).toBe(true);
+		expect(canMakePrivate(owner, video('added'))).toBe(true);
+		expect(canMakePrivate(owner, video('private'))).toBe(false);
+		expect(canMakePrivate(owner, video('removed'))).toBe(false);
+		expect(canMakePrivate(other, video('added'))).toBe(false);
+		expect(canMakePrivate(owner, video('added', 'staff'))).toBe(false);
 	});
 });

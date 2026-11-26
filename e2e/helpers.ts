@@ -43,3 +43,15 @@ export async function activePlayer(page: Page, prefix = 'player'): Promise<strin
 	await logIn(page, name);
 	return name;
 }
+
+export const CLIP = 'test-data/fixtures/clip.mp4';
+export const FAKE_CLIP = 'test-data/fixtures/fake.mp4';
+
+/** Uploads a clip on an exercise page and waits for it to show up. */
+export async function uploadClip(page: Page, exerciseId: string, title: string, opts: { request?: boolean; file?: string } = {}) {
+	await page.goto(`/exercise/${exerciseId}`);
+	await page.getByLabel('Video file').setInputFiles(opts.file ?? CLIP);
+	await page.getByLabel('Title').fill(title);
+	if (opts.request) await page.getByLabel('Ask staff to add it for everyone').check();
+	await page.getByRole('button', { name: 'Upload' }).click();
+}

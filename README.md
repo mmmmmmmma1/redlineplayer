@@ -19,6 +19,16 @@ npm run dev
 
 Data (the database and videos) goes in `./data`, or in the folder named by `DATA_DIR`.
 
+## Run it on a server
+
+```bash
+npm ci && npm run build
+npm run create-admin -- --username YourName   # type the password, then Enter
+ORIGIN=https://your.site BODY_SIZE_LIMIT=210M node build
+```
+
+`BODY_SIZE_LIMIT` must allow 200 MB video uploads. Put it behind HTTPS so login cookies are secure.
+
 ## Tests
 
 ```bash

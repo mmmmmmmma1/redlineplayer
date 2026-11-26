@@ -35,3 +35,8 @@ export function canRequestVideo(a: Actor | null, v: Video): boolean {
 export function canReport(a: Actor | null, v: Video): boolean {
 	return isActive(a) && !owns(a, v) && canSeeVideo(a, v);
 }
+
+/** Owners can pull their own request back, or take an added video off the team list. */
+export function canMakePrivate(a: Actor | null, v: Video): boolean {
+	return isActive(a) && owns(a, v) && v.kind === 'player' && (v.status === 'requested' || v.status === 'added');
+}
