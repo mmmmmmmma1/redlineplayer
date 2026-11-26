@@ -2,6 +2,7 @@ import type { Handle } from '@sveltejs/kit/hooks';
 import { getDb } from '#lib/server/db/index.js';
 import { validateSession } from '#lib/server/auth/session.js';
 import { SESSION_COOKIE, clearSessionCookie } from '#lib/server/cookies.js';
+import { sweepTmp } from '#lib/server/video/upload.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = null;
@@ -18,3 +19,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	response.headers.set('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
 	return response;
 };
+
+// Uploads interrupted by a restart leave temp files behind.
+sweepTmp();
