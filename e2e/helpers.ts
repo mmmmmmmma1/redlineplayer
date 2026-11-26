@@ -22,6 +22,7 @@ export async function logIn(page: Page, username: string, password = username ==
 }
 
 export async function logOut(page: Page) {
+	if (!page.url().endsWith('/profile') && !page.url().endsWith('/pending') && !(await page.getByRole('button', { name: 'Log out' }).isVisible())) await page.goto('/profile');
 	await page.getByRole('button', { name: 'Log out' }).click();
 }
 
