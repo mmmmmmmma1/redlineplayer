@@ -1,0 +1,107 @@
+/* Edgework theme. Hockey is ice blue; track tints it warm red. */
+:root {
+	--bg: #080d18;
+	--surface: #111827;
+	--surface2: #1a2335;
+	--stroke: rgba(255, 255, 255, 0.07);
+	--text: #edf2fa;
+	--text2: #8d99b2;
+	--text3: #5a6680;
+	--accent: #7cd4ff;
+	--accent-deep: #2f8cff;
+	--red: #ff4d5e;
+	--green: #3ddc97;
+	--amber: #ffb547;
+	--radius: 20px;
+	color-scheme: dark;
+}
+:root[data-sport='track'] {
+	--bg: #100a0c;
+	--surface: #1c1316;
+	--surface2: #271b1f;
+	--text2: #b0979c;
+	--text3: #7a6266;
+	--accent: #ff8a7a;
+	--accent-deep: #e5484d;
+}
+* {
+	box-sizing: border-box;
+	margin: 0;
+	-webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+	background: var(--bg);
+	color: var(--text);
+	font: 16px/1.45 -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+h1 {
+	font-size: 34px;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.1;
+}
+a {
+	color: var(--accent);
+}
+.overline {
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.sub {
+	color: var(--text2);
+}
+.card {
+	background: var(--surface);
+	border: 1px solid var(--stroke);
+	border-radius: var(--radius);
+	padding: 16px;
+}
+.btn {
+	appearance: none;
+	border: 0;
+	background: var(--accent);
+	color: var(--bg);
+	font: inherit;
+	font-weight: 700;
+	padding: 12px 18px;
+	border-radius: 14px;
+	cursor: pointer;
+}
+.btn.secondary {
+	background: var(--surface2);
+	color: var(--text);
+}
+.btn.danger {
+	background: var(--red);
+	color: #fff;
+}
+.btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+input,
+select,
+textarea {
+	font: inherit;
+	color: var(--text);
+	background: var(--surface2);
+	border: 1px solid var(--stroke);
+	border-radius: 12px;
+	padding: 11px 13px;
+	width: 100%;
+}
+label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text2);
+	margin: 14px 2px 6px;
+}
+.error {
+	color: var(--red);
+	font-weight: 600;
+}
