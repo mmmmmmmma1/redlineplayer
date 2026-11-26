@@ -28,3 +28,17 @@ export async function logOut(page: Page) {
 /** Made by the create-admin script before the test server starts (see playwright.config.ts). */
 export const ADMIN = 'e2e_admin';
 export const ADMIN_PASSWORD = 'e2e admin password';
+
+/** Signs up a new player, has the admin approve them, and leaves them logged in. Returns the username. */
+export async function activePlayer(page: Page, prefix = 'player'): Promise<string> {
+	const name = uniqueName(prefix);
+	await signUp(page, name);
+	await logOut(page);
+	await logIn(page, ADMIN);
+	await page.goto('/staff/accounts');
+	await page.getByRole('listitem').filter({ hasText: name }).getByRole('button', { name: 'Approve' }).click();
+	await page.getByRole('listitem').filter({ hasText: name }).getByRole('button', { name: 'Suspend' }).waitFor();
+	await logOut(page);
+	await logIn(page, name);
+	return name;
+}
