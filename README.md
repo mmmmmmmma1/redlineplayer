@@ -27,7 +27,15 @@ npm run create-admin -- --username YourName   # type the password, then Enter
 ORIGIN=https://your.site BODY_SIZE_LIMIT=210M node build
 ```
 
-`BODY_SIZE_LIMIT` must allow 200 MB video uploads. Put it behind HTTPS so login cookies are secure.
+- `BODY_SIZE_LIMIT` must allow 200 MB video uploads. Every other route refuses bodies over 64 KB,
+  so the big limit only matters for uploads.
+- Put it behind HTTPS so login cookies are secure, and turn on HSTS at the proxy.
+- **Behind a proxy (nginx, Caddy):** tell the app which header has the real visitor IP, or every
+  login looks like it comes from the proxy and one person's typos can lock out the whole team:
+  `ADDRESS_HEADER=X-Forwarded-For XFF_DEPTH=1` (1 = one proxy in front). Make sure the proxy
+  overwrites that header, so visitors can't fake it.
+- Failed logins are limited to 5 a minute per username and 20 an hour per address
+  (`LOGIN_IP_LIMIT_PER_HOUR`). Raise the hourly one if the whole team shares one network.
 
 ## Tests
 
