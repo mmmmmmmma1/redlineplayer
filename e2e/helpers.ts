@@ -14,7 +14,7 @@ export async function signUp(page: Page, username: string, password = PASSWORD) 
 	await page.getByRole('button', { name: 'Create account' }).click();
 }
 
-export async function logIn(page: Page, username: string, password = PASSWORD) {
+export async function logIn(page: Page, username: string, password = username === 'e2e_admin' ? 'e2e admin password' : PASSWORD) {
 	await page.goto('/login');
 	await page.getByLabel('Username').fill(username);
 	await page.getByLabel('Password').fill(password);
@@ -24,3 +24,7 @@ export async function logIn(page: Page, username: string, password = PASSWORD) {
 export async function logOut(page: Page) {
 	await page.getByRole('button', { name: 'Log out' }).click();
 }
+
+/** Made by the create-admin script before the test server starts (see playwright.config.ts). */
+export const ADMIN = 'e2e_admin';
+export const ADMIN_PASSWORD = 'e2e admin password';
