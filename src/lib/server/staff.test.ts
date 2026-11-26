@@ -137,3 +137,14 @@ describe('listing', () => {
 		expect(JSON.stringify(l)).not.toContain('passwordHash');
 	});
 });
+
+describe('restoring staff', () => {
+	it('only an admin can restore a suspended staff member', () => {
+		const { db, admin, staff } = setup();
+		const other = add(db, 'staff3', 'staff', 'active');
+		decideUser(db, admin, other.id, 'suspend');
+		expect(decideUser(db, staff, other.id, 'restore')).toHaveProperty('error');
+		expect(get(db, other.id).status).toBe('suspended');
+		expect(decideUser(db, admin, other.id, 'restore')).toEqual({ ok: true });
+	});
+});

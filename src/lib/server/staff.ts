@@ -24,8 +24,9 @@ export function decideUser(db: Db, actor: User, targetId: string, decision: Deci
 	if (!target) return { error: 'No such account.' };
 	if (target.id === actor.id) return { error: "You can't change your own account here." };
 	if (!FROM[decision].includes(target.status)) return { error: 'That account has changed. Reload the page.' };
-	if (decision === 'suspend' && target.role !== 'player' && actor.role !== 'admin') {
-		return { error: 'Only an admin can suspend staff.' };
+	// Staff and admin accounts are only changed by an admin, so staff can't undo an admin's decision.
+	if (target.role !== 'player' && actor.role !== 'admin') {
+		return { error: 'Only an admin can change staff accounts.' };
 	}
 	db.update(users)
 		.set({ status: TO[decision], decidedBy: actor.id, decidedAt: Date.now() })
