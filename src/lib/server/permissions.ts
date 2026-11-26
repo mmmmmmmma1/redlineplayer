@@ -13,19 +13,22 @@ export const canReview = isStaff;
 
 const owns = (a: Actor, v: Video) => a.id === v.ownerId;
 
-/** Owners always see their own (unless removed); staff see everything; others see staff videos and added ones. */
+/**
+ * Owners always see their own (unless removed). Others see staff videos and added ones.
+ * Staff also see anything that was asked for or acted on (requested, declined, removed),
+ * but never a player's private video: private means only the owner.
+ */
 export function canSeeVideo(a: Actor | null, v: Video): boolean {
 	if (!isActive(a)) return false;
-	if (isStaff(a)) return true;
-	if (v.status === 'removed') return false;
-	if (owns(a, v)) return true;
-	return v.kind === 'staff' || v.status === 'added';
+	if (owns(a, v)) return v.status !== 'removed' || isStaff(a);
+	if (v.kind === 'staff' || v.status === 'added') return v.status !== 'removed' || isStaff(a);
+	if (isStaff(a)) return v.status !== 'private';
+	return false;
 }
 
 export function canDeleteVideo(a: Actor | null, v: Video): boolean {
-	if (!isActive(a)) return false;
-	if (isStaff(a)) return true;
-	return owns(a, v) && v.status !== 'removed';
+	if (!canSeeVideo(a, v)) return false;
+	return owns(a!, v) ? v.status !== 'removed' : isStaff(a);
 }
 
 export function canRequestVideo(a: Actor | null, v: Video): boolean {

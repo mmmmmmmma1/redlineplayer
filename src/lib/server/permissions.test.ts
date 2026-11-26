@@ -73,8 +73,14 @@ describe('seeing videos', () => {
 		expect(canSeeVideo(other, video(status))).toBe(otherSees);
 	});
 
-	it('staff see every video, including removed', () => {
-		for (const [s] of cases) expect(canSeeVideo(actor('staff'), video(s))).toBe(true);
+	it("staff see requested, added, declined and removed videos, but not a player's private ones", () => {
+		for (const s of ['requested', 'added', 'declined', 'removed'] as const) expect(canSeeVideo(actor('staff'), video(s))).toBe(true);
+		expect(canSeeVideo(actor('staff'), video('private'))).toBe(false);
+		expect(canSeeVideo(actor('admin'), video('private'))).toBe(false);
+	});
+
+	it('staff still see their own private videos', () => {
+		expect(canSeeVideo(actor('staff', 'active', 'owner'), video('private'))).toBe(true);
 	});
 
 	it('everyone active sees staff videos', () => {
@@ -92,7 +98,8 @@ describe('changing videos', () => {
 	it('owner or staff can delete', () => {
 		expect(canDeleteVideo(owner, video('added'))).toBe(true);
 		expect(canDeleteVideo(other, video('added'))).toBe(false);
-		expect(canDeleteVideo(actor('staff'), video('private'))).toBe(true);
+		expect(canDeleteVideo(actor('staff'), video('added'))).toBe(true);
+		expect(canDeleteVideo(actor('staff'), video('private'))).toBe(false);
 		expect(canDeleteVideo(owner, video('removed'))).toBe(false);
 	});
 
