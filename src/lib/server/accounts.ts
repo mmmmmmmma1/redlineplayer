@@ -43,6 +43,8 @@ let dummyHash: Promise<string> | undefined;
 
 /** The user for a username and password, or null. Status is checked by the caller. */
 export async function checkLogin(db: Db, username: string, password: string): Promise<User | null> {
+	// No account can have a longer password, so don't spend time hashing one.
+	if (password.length > 128) return null;
 	const name = normaliseUsername(username);
 	const user = 'key' in name ? db.select().from(users).where(eq(users.usernameKey, name.key)).get() : undefined;
 	if (!user) {

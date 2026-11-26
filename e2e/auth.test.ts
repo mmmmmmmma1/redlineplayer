@@ -72,3 +72,11 @@ test('logging in successfully many times is not rate limited', async ({ page }) 
 		await expect(page).toHaveURL(/\/pending$/);
 	}
 });
+
+test('oversized form posts are refused before they are read', async ({ request }) => {
+	const res = await request.post('/login', {
+		headers: { origin: 'http://localhost:4173' },
+		form: { username: 'someone', password: 'x'.repeat(200_000) }
+	});
+	expect(res.status()).toBe(413);
+});
