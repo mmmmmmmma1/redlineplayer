@@ -28,3 +28,18 @@ describe('checking without counting', () => {
 		expect(rl.blocked('k')).toBe(false);
 	});
 });
+
+describe('refunds and memory', () => {
+	it('refund gives a try back', () => {
+		const rl = createRateLimiter({ max: 1, windowMs: 60_000 });
+		rl.hit('k');
+		rl.refund('k');
+		expect(rl.hit('k')).toBe(true);
+	});
+
+	it('never keeps more than maxKeys keys', () => {
+		const rl = createRateLimiter({ max: 5, windowMs: 60_000, maxKeys: 100 });
+		for (let i = 0; i < 1000; i++) rl.hit('k' + i);
+		expect(rl.size()).toBeLessThanOrEqual(100);
+	});
+});
