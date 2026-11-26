@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CATEGORIES, EQUIPMENT, MUSCLES, formatTarget, levelTitle } from '#lib/data/library.js';
 	import HowTo from '#lib/components/HowTo.svelte';
-	let { data } = $props();
+	let { data, form } = $props();
 	const e = $derived(data.exercise);
 </script>
 
@@ -39,6 +39,8 @@
 	{#if e.equipment.length}<p class="sub">Equipment: {e.equipment.map((q) => EQUIPMENT[q] ?? q).join(', ')}</p>{/if}
 </section>
 
+{#if form?.reported}<p class="note" role="status">Thanks. Staff will look at it.</p>{/if}
+{#if form?.error}<p class="error" role="status">{form.error}</p>{/if}
 <HowTo exerciseId={e.id} exerciseName={e.name} videos={data.videos} staff={data.staff} />
 
 <style>
@@ -47,5 +49,7 @@
 	section { margin-top: 14px; }
 	h2 { font-size: 15px; margin-bottom: 8px; }
 	ol, ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+	.note { color: var(--green); margin-top: 16px; }
+	.error { margin-top: 16px; }
 	.muscles p + p { margin-top: 4px; }
 </style>

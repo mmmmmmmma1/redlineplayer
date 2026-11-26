@@ -11,6 +11,7 @@
 		declineReason: string | null;
 		ownerName: string;
 		mine: boolean;
+		reportedByMe: boolean;
 	};
 
 	let {
@@ -87,7 +88,20 @@
 				<span class="sub">{v.kind === 'staff' ? 'Coach' : 'By'} {v.ownerName}</span>
 			{/if}
 		</div>
-		{#if v.mine || staff}
+		{#if !v.mine && v.reportedByMe}
+			<p class="sub reported">Reported</p>
+		{:else if !v.mine}
+			<details class="report">
+				<summary>Report</summary>
+				<form method="POST" action="?/report" use:enhance>
+					<input type="hidden" name="id" value={v.id} />
+					<label for="report-{v.id}">What is wrong?</label>
+					<input id="report-{v.id}" name="reason" maxlength="300" />
+					<button class="btn secondary">Send report</button>
+				</form>
+			</details>
+		{/if}
+		{#if v.mine}
 			<form method="POST" use:enhance class="actions">
 				<input type="hidden" name="id" value={v.id} />
 				{#if v.mine && v.kind === 'player' && (v.status === 'private' || v.status === 'declined')}
@@ -168,5 +182,8 @@
 	.add .btn[type='submit'] { margin-top: 14px; }
 	.small { font-size: 13px; margin-top: 8px; }
 	.error { margin-top: 10px; }
+	.report, .reported { margin-top: 8px; font-size: 14px; }
+	.report summary { cursor: pointer; color: var(--text2); font-size: 14px; }
+	.report .btn { margin-top: 8px; }
 	.link { background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; padding: 0; }
 </style>

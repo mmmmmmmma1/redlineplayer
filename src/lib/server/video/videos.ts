@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { and, asc, eq } from 'drizzle-orm';
 import { dataDir, type Db } from '../db/index';
-import { users, videos, type User, type Video } from '../db/schema';
+import { reports, users, videos, type User, type Video } from '../db/schema';
 import { audit } from '../audit';
 import { canDeleteVideo, canMakePrivate, canRequestVideo, canSeeVideo, isStaff } from '../permissions';
 import { diskStorage, type VideoStorage } from './storage';
@@ -17,6 +17,7 @@ export type VideoView = {
 	declineReason: string | null;
 	ownerName: string;
 	mine: boolean;
+	reportedByMe: boolean;
 };
 
 let storage: VideoStorage | undefined;
@@ -60,6 +61,9 @@ export function listVideosFor(db: Db, actor: User, exerciseId: string): { staff:
 		.where(eq(videos.exerciseId, exerciseId))
 		.orderBy(asc(videos.createdAt))
 		.all();
+	const reported = new Set(
+		db.select({ id: reports.videoId }).from(reports).where(eq(reports.reporterId, actor.id)).all().map((r) => r.id)
+	);
 	const out = { staff: [] as VideoView[], mine: [] as VideoView[], community: [] as VideoView[] };
 	for (const { v, ownerName } of rows) {
 		if (v.status === 'removed' || !canSeeVideo(actor, v)) continue;
@@ -70,7 +74,8 @@ export function listVideosFor(db: Db, actor: User, exerciseId: string): { staff:
 			kind: v.kind,
 			declineReason: v.ownerId === actor.id ? v.declineReason : null,
 			ownerName,
-			mine: v.ownerId === actor.id
+			mine: v.ownerId === actor.id,
+			reportedByMe: reported.has(v.id)
 		};
 		if (v.kind === 'staff') out.staff.push(view);
 		else if (view.mine) out.mine.push(view);

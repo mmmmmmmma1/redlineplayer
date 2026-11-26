@@ -4,6 +4,7 @@ import { byId } from '#lib/data/library.js';
 import { getDb } from '#lib/server/db/index.js';
 import { requireActive } from '#lib/server/guard.js';
 import { isStaff } from '#lib/server/permissions.js';
+import { reportVideo } from '#lib/server/video/review.js';
 import { deleteVideo, getStorage, listVideosFor, makePrivate, requestVideo } from '#lib/server/video/videos.js';
 
 export const load: PageServerLoad = (event) => {
@@ -23,6 +24,11 @@ export const actions: Actions = {
 	makePrivate: async (event) => {
 		const r = makePrivate(getDb(), requireActive(event), await videoId(event.request));
 		return 'error' in r ? fail(400, r) : r;
+	},
+	report: async (event) => {
+		const f = await event.request.formData();
+		const r = reportVideo(getDb(), requireActive(event), String(f.get('id') ?? ''), String(f.get('reason') ?? ''));
+		return 'error' in r ? fail(400, r) : { reported: true };
 	},
 	delete: async (event) => {
 		const r = await deleteVideo(getDb(), getStorage(), requireActive(event), await videoId(event.request));
